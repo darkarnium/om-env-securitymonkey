@@ -1,0 +1,5 @@
+name: default
+title: OM-Env-SecurityMonkey InSpec Profile
+maintainer: Peter Adkins
+summary: An InSpec Compliance Profile for the Security Monkey Environment Cookbook
+version: 0.1.0

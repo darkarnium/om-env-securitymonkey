@@ -1,5 +1,5 @@
 # Installation source and destination.
-default['securitymonkey']['git']['ref'] = 'ff0517cab6da3e3b4afc708eddab846346ea89ee'
+default['securitymonkey']['git']['ref'] = '51da5bf3b63da4d9474bb97c9fb9ffe3e5cc104a'
 default['securitymonkey']['git']['repo'] = 'https://github.com/Netflix/security_monkey.git'
 
 # Who to run Security Monkey as.
@@ -33,7 +33,7 @@ default['securitymonkey']['dependencies'] = [
   'libpq-dev',
   'libffi-dev',
   'supervisor',
-  'libyaml-dev'
+  'libyaml-dev',
 ]
 
 # Define a set of environment variables to be passed to any and all Security
@@ -44,5 +44,5 @@ default['securitymonkey']['environment'] = {
   ),
   SECURITY_MONKEY_SETTINGS: ::File.join(
     node['securitymonkey']['dir']['config'], 'config-deploy.py'
-  )
+  ),
 }

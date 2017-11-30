@@ -1,15 +1,30 @@
 ---
 driver:
   name: vagrant
+  customize:
+    memory: 2048
 
 provisioner:
   name: chef_zero
 
+verifier:
+  name: inspec
+
 platforms:
   - name: ubuntu-14.04
+  - name: ubuntu-16.04
 
 suites:
   - name: default
+    data_bags_path: "test/integration/data_bags" 
     run_list:
-      - recipe[securitymonkey]
+      - recipe[om-env-securitymonkey]
     attributes:
+      postgresql:
+        password:
+          postgres: aVeryStrongPassword
+      securitymonkey:
+        config:
+          fqdn: localhost
+          secret_key: aVerySecretKey
+          security_password_salt: theSaltiestOfSalts
