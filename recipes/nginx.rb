@@ -1,5 +1,5 @@
 #
-# Cookbook Name:: securitymonkey
+# Cookbook Name:: om-env-securitymonkey
 # Recipe:: nginx
 #
 
@@ -29,7 +29,7 @@ end
 directory '/etc/nginx/ssl/cert/' do
   owner 'www-data'
   group 'www-data'
-  mode 00755
+  mode '0755'
   recursive true
   action :create
 end
@@ -37,20 +37,20 @@ end
 directory '/etc/nginx/ssl/private/' do
   owner 'root'
   group 'root'
-  mode 00750
+  mode '0750'
   recursive true
   action :create
 end
 
 # Generate an RSA key and associated self-signed certificate.
 openssl_rsa_key '/etc/nginx/ssl/private/securitymonkey.key' do
-  mode 00640
+  mode '0640'
   key_length 2048
 end
 
 openssl_x509 '/etc/nginx/ssl/cert/securitymonkey.crt' do
   org node['nginx']['ssl']['org']
-  mode 00640
+  mode '0640'
   group node['securitymonkey']['group']
   expire node['nginx']['ssl']['days']
   country node['nginx']['ssl']['country']
@@ -61,10 +61,10 @@ end
 
 # Install the Nginx configuration and link into service.
 template '/etc/nginx/sites-available/securitymonkey.conf' do
-  source 'securitymonkey.conf.erb'
+  source 'nginx/securitymonkey.conf.erb'
   owner 'root'
   group 'root'
-  mode 00644
+  mode '0644'
   variables(
     ssl: node['nginx']['ssl']['enable'],
     log_dir: node['securitymonkey']['dir']['log'],

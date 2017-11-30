@@ -1,5 +1,5 @@
 #
-# Cookbook Name:: securitymonkey
+# Cookbook Name:: om-env-securitymonkey
 # Recipe:: database
 #
 

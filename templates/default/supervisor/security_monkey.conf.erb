@@ -1,0 +1,14 @@
+[program:securitymonkey]
+user=<%= @user %>
+autostart=true
+autorestart=true
+environment=<%= @environment.to_hash.map{|k,v| "#{k}=#{v}"}.join(',') -%>,PYTHONPATH='<%= @base_dir -%>',PATH="<%= ::File.join(@virtualenv_dir, 'bin/') -%>:%(ENV_PATH)s"
+command=<%= ::File.join(@virtualenv_dir, 'bin/monkey') -%> run_api_server
+
+[program:securitymonkeyscheduler]
+user=<%= @user %>
+autostart=true
+autorestart=true
+directory=<%= @base_dir %>
+environment=<%= @environment.to_hash.map{|k,v| "#{k}=#{v}"}.join(',') -%>,PYTHONPATH='<%= @base_dir -%>',PATH="<%= ::File.join(@virtualenv_dir, 'bin/') -%>:%(ENV_PATH)s"
+command=<%= ::File.join(@virtualenv_dir, 'bin/monkey') -%> start_scheduler

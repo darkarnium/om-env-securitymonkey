@@ -2,14 +2,14 @@ VAGRANTFILE_API_VERSION = '2'.freeze
 
 Vagrant.require_version '>= 1.5.0'
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
-  config.vm.hostname = 'securitymonkey'
+  config.vm.hostname = 'om-env-securitymonkey'
 
   config.berkshelf.enabled = true
   if Vagrant.has_plugin?('vagrant-omnibus')
     config.omnibus.chef_version = 'latest'
   end
 
-  config.vm.box = 'ubuntu/trusty64'
+  config.vm.box = 'ubuntu/xenial64'
   config.vm.network :private_network, type: 'dhcp'
   config.vm.network 'forwarded_port', guest: 443, host: 8443
   config.vm.network 'forwarded_port', guest: 80, host: 8080
@@ -22,20 +22,20 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     chef.json = {
       'postgresql' => {
         'password' => {
-          'postgres' => 'aVeryStrongPassword'
+          'postgres' => 'aVeryStrongPassword',
         }
       },
       'securitymonkey' => {
         'config' => {
           'fqdn' => 'localhost',
           'secret_key' => 'aVerySecretKey',
-          'security_password_salt' => 'theSaltiestOfSalts'
+          'security_password_salt' => 'theSaltiestOfSalts',
         }
       }
     }
 
     chef.run_list = [
-      'recipe[securitymonkey]'
+      'recipe[om-env-securitymonkey]',
     ]
   end
 end

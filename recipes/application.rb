@@ -1,5 +1,5 @@
 #
-# Cookbook Name:: securitymonkey
+# Cookbook Name:: om-env-securitymonkey
 # Recipe:: application
 #
 
@@ -19,14 +19,16 @@ group node['securitymonkey']['group'] do
 end
 
 user node['securitymonkey']['user'] do
+  home node['securitymonkey']['dir']['base']
   group node['securitymonkey']['group']
-  comment 'NetFlix Security Monkey'
+  comment 'Netflix Security Monkey'
+  manage_home false
 end
 
 # Create the base directory and setup a virtualenv.
 directory node['securitymonkey']['dir']['base'] do
   user node['securitymonkey']['user']
-  mode 00750
+  mode '0750'
   group node['securitymonkey']['group']
   recursive true
   action :create
@@ -38,6 +40,7 @@ git node['securitymonkey']['dir']['base'] do
   action :sync
   reference  node['securitymonkey']['git']['ref']
   repository node['securitymonkey']['git']['repo']
+  notifies :run, 'execute[dart-get]'
 end
 
 # Write out the deployment configuration template.
@@ -56,7 +59,7 @@ template ::File.join(node['securitymonkey']['dir']['config'], 'config-deploy.py'
     postgres_database: node['securitymonkey']['config']['database']['name'],
     security_password_salt: node['securitymonkey']['config']['secret_key']
   )
-  mode 00640
+  mode '0640'
 end
 
 python_virtualenv 'securitymonkey' do
@@ -75,20 +78,11 @@ python_execute 'install' do
   environment node['securitymonkey']['environment']
 end
 
-# Ensure the log directory exists and is correctly owned.
-directory node['securitymonkey']['dir']['log'] do
-  owner node['securitymonkey']['user']
-  group node['securitymonkey']['group']
-  mode 00750
-  recursive true
-  action :create
-end
-
 # Build the Web UI.
 execute 'dart-get' do
   cwd ::File.join(node['securitymonkey']['dir']['base'], 'dart')
   user node['securitymonkey']['user']
-  action :run
+  action :nothing
   command '/usr/lib/dart/bin/pub get'
   environment(
     PUB_CACHE: ::File.join(node['securitymonkey']['dir']['base'])
@@ -105,6 +99,15 @@ execute 'dart-build' do
   )
 end
 
+# Ensure the log directory exists and is correctly owned.
+directory node['securitymonkey']['dir']['log'] do
+  owner node['securitymonkey']['user']
+  group node['securitymonkey']['group']
+  mode '0750'
+  recursive true
+  action :create
+end
+
 # Link in static assets.
 link ::File.join(node['securitymonkey']['dir']['base'], 'security_monkey/static') do
   to ::File.join(node['securitymonkey']['dir']['base'], 'dart/build/web')
@@ -115,32 +118,29 @@ python_execute 'db-upgrade' do
   cwd node['securitymonkey']['dir']['base']
   user node['securitymonkey']['user']
   action :run
-  command 'manage.py db upgrade'
+  command 'security_monkey/manage.py db upgrade'
   virtualenv 'securitymonkey'
   environment node['securitymonkey']['environment']
 end
 
 # Create and install supervisor services.
-supervisor_command = format(
-  '%{python} %{script}',
-  python: ::File.join(node['securitymonkey']['dir']['venv'], '/bin/python'),
-  script: ::File.join(node['securitymonkey']['dir']['base'], 'manage.py')
-)
+package 'supervisor'
 
-supervisor_service 'securitymonkey' do
-  user node['securitymonkey']['user']
-  command "#{supervisor_command} run_api_server"
-  directory node['securitymonkey']['dir']['base']
-  autostart true
-  autorestart true
-  environment node['securitymonkey']['environment']
+service 'supervisor' do
+  action [:enable, :start]
 end
 
-supervisor_service 'securitymonkeyscheduler' do
-  user node['securitymonkey']['user']
-  command "#{supervisor_command} start_scheduler"
-  directory node['securitymonkey']['dir']['base']
-  autostart true
-  autorestart true
-  environment node['securitymonkey']['environment']
+template '/etc/supervisor/conf.d/security_monkey.conf' do
+  source 'supervisor/security_monkey.conf.erb'
+  owner 'root'
+  group 'root'
+  mode '0644'
+  action :create
+  variables(
+    user: node['securitymonkey']['user'],
+    base_dir: node['securitymonkey']['dir']['base'],
+    environment: node['securitymonkey']['environment'],
+    virtualenv_dir: node['securitymonkey']['dir']['venv']
+  )
+  notifies :restart, 'service[supervisor]', :immediately
 end
