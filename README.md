@@ -4,7 +4,7 @@ Provides a Chef environment cookbook for provisioning a Netflix Security Monkey 
 
 ## Versions
 
-Currently, this cookbook is set to use Netflix/security_monkey@51da5bf3b63da4d9474bb97c9fb9ffe3e5cc104a. This is due to there being fixes required to psycopg2 back @ Netflix/security_monkey@a5a913b8b4cb9fccd34677112a939074e2310848 which prevents Security Monkey from being used with PostgreSQL 10.X.
+Currently, this cookbook is set to use Netflix/security\_monkey@51da5bf3b63da4d9474bb97c9fb9ffe3e5cc104a. This is due to there being fixes required to psycopg2 back @ Netflix/security\_monkey@a5a913b8b4cb9fccd34677112a939074e2310848 which prevents Security Monkey from being used with PostgreSQL 10.X.
 
 If desired, the version of Security Monkey to install can be changed by overriding the `node['securitymonkey']['git']['ref']` attribute.
 

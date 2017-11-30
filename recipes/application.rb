@@ -40,7 +40,7 @@ git node['securitymonkey']['dir']['base'] do
   action :sync
   reference  node['securitymonkey']['git']['ref']
   repository node['securitymonkey']['git']['repo']
-  notifies :run, 'execute[dart-get]'
+  notifies :run, 'execute[dart-get]', :immediately
 end
 
 # Write out the deployment configuration template.
