@@ -5,12 +5,7 @@ describe service('nginx') do
   it { should be_running }
 end
 
-# Ensure nginx is listening.
-describe port(80) do
-  it { should be_listening }
-  its('processes') { should include 'nginx' }
-end
-
+# Ensure nginx is listening - assumes SSL per default.
 describe port(443) do
   it { should be_listening }
   its('processes') { should include 'nginx' }
